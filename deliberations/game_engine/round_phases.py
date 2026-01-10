@@ -44,15 +44,15 @@ def phase_pitches(context: RoundContext) -> None:
         context.logger.info(f"Player {player.config.player_id} is making their pitch")
         visible_events = context.history.render_for_player(player.config.player_id)
         system_prompt = f"""
-{context.rules_prompt}
+            {context.rules_prompt}
 
-{player.config.character_prompt}
+            {player.config.character_prompt}
 
-Please make your pitch for why you should {outcome}.
+            Please make your pitch for why you should {outcome}.
 
-The remaining players are: {context.active_player_ids}.
+            The remaining players are: {context.active_player_ids}.
 
-Other players will be able to see your pitch.
+            Other players will be able to see your pitch.
         """
 
         response = player.respond(
