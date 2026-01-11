@@ -9,7 +9,7 @@ from .client_factory import ClientFactory
 from .history import History
 from .player import Player, PlayerConfig
 from .round import Round, RoundContext
-from .round_phases import phase_pitches, phase_votes
+from .round_phases import phase_pitches, phase_votes, phase_condense_memory
 
 
 @dataclass
@@ -160,7 +160,7 @@ class GameEngine:
                 players=self.players,
                 active_player_ids=active_player_ids,
             )
-            round = Round(context=round_context, phases=[phase_pitches, phase_votes])
+            round = Round(context=round_context, phases=[phase_pitches, phase_votes, phase_condense_memory])
             round.play()
 
             self.game_config.logger.info(

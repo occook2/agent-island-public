@@ -1,4 +1,5 @@
 import random
+from typing import Any
 
 from .round import RoundContext
 
@@ -212,3 +213,70 @@ def phase_votes(context: RoundContext) -> None:
             )
 
     context.votes["selected_player"] = selected_player_id
+
+def phase_condense_memory(context: RoundContext) -> None:
+    """
+    Allow each model to log what has occured during the round.
+
+    Args:
+        context: The round context
+
+    Returns:
+        None
+    """
+
+    players = context.active_player_ids
+    summaries: list[tuple[str, Any]] = []  # Store (player_id, response) pairs
+
+    # Permute the player IDs to avoid order effects
+    for player_id in permute_player_ids(players):
+        # Get the player object from the voter ID
+        player = next(
+            player for player in context.players if player.config.player_id == player_id
+        )
+
+        # Find events that are only visible to current player
+        visible_events = context.history.render_for_player(player_id)
+
+        system_prompt = f"""
+            {context.rules_prompt}
+
+            {player.config.character_prompt}
+
+            Please summarize the events of this round.
+
+            You must be brief, there is a limit on how long your ansewr can be.
+
+            This summary will be the only context on the events of this round that you will have in future rounds.
+
+            Other players will not be able to see your summary of these events.
+        """
+
+        response = player.respond(
+            system_prompt=system_prompt,
+            messages=[
+                {
+                    "role": "user",
+                    "content": visible_events,
+                },
+            ],
+        )
+
+        # Store the response to be processed after all players have summarized
+        summaries.append((player_id, response, system_prompt, visible_events))
+
+    # Clear the round's event history and replace with summaries
+    context.history.rounds[context.round_index].events = []
+
+    # Add each summary as an event visible only to that player
+    for player_id, response, system_prompt, visible_events in summaries:
+        context.history.add_event(
+            round_index=context.round_index,
+            heading=f"Player {player_id}'s Summary",
+            role=f"player {player_id}",
+            prompt=f"{system_prompt}\n\n{visible_events}",
+            content=response.text,
+            reasoning=response.reasoning,
+            response=response,
+            visibility=[player_id],
+        )
