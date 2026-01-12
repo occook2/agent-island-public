@@ -75,6 +75,7 @@ def phase_pitches(context: RoundContext) -> None:
             reasoning=response.reasoning,
             response=response,
             visibility=context.history.player_ids,
+            round_visibility=context.history.player_ids,
         )
 
 
@@ -156,6 +157,7 @@ def phase_votes(context: RoundContext) -> None:
             reasoning=response.reasoning,
             response=response,
             visibility=[player.config.player_id],
+            round_visibility=[player.config.player_id],
         )
 
         # Extract the vote from the player response
@@ -197,6 +199,7 @@ def phase_votes(context: RoundContext) -> None:
                 heading=f"Round {context.round_index} Vote Results",
                 content=f"Player {selected_player_id} {outcome_verb} with {max_votes} vote(s).",
                 visibility=context.history.player_ids,
+                round_visibility=context.history.player_ids,
             )
 
         # If there is a tie, randomly select a player from the tied players
@@ -210,6 +213,7 @@ def phase_votes(context: RoundContext) -> None:
                 heading=f"Round {context.round_index} Vote Results",
                 content=f"There is a tie between {tied_players} with {max_votes} vote(s), so we are randomly selecting one player. Player {selected_player_id} {outcome_verb}.",
                 visibility=context.history.player_ids,
+                round_visibility=context.history.player_ids,
             )
 
     context.votes["selected_player"] = selected_player_id
@@ -265,8 +269,9 @@ def phase_condense_memory(context: RoundContext) -> None:
         # Store the response to be processed after all players have summarized
         summaries.append((player_id, response, system_prompt, visible_events))
 
-    # Clear the round's event history and replace with summaries
-    context.history.rounds[context.round_index].events = []
+    # Hide all old events from current players
+    for event in context.history.rounds[context.round_index].events:
+        event.visibility = []
 
     # Add each summary as an event visible only to that player
     for player_id, response, system_prompt, visible_events in summaries:
@@ -279,4 +284,5 @@ def phase_condense_memory(context: RoundContext) -> None:
             reasoning=response.reasoning,
             response=response,
             visibility=[player_id],
+            round_visibility=[player_id],
         )

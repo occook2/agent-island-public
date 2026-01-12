@@ -22,6 +22,7 @@ class Event:
     prompt: str
     content: str
     visibility: List[str]
+    round_visibility: List[str]
     reasoning: str | None = None
     response: Any | None = None
 
@@ -32,6 +33,7 @@ class Event:
             "prompt": self.prompt,
             "content": self.content,
             "visibility": self.visibility,
+            "round_visibility": self.round_visibility,
             "reasoning": self.reasoning,
             "response": repr(self.response),
         }
@@ -121,6 +123,7 @@ class History:
         prompt: str,
         content: str,
         visibility: List[str],
+        round_visibility: List[str],
         reasoning: str | None = None,
         response: Any | None = None,
     ) -> None:
@@ -134,6 +137,7 @@ class History:
             prompt: The prompt provided to the player
             content: The content of the event (player response or narrator message)
             visibility: The visibility of the event content
+            round_visibility: The visibility of the event in round. Shows what each player sees temporarily, and is responsible for summarizing.
             reasoning: The reasoning provided by the player
             response: The response provided by the player
 
@@ -147,6 +151,7 @@ class History:
                 prompt=prompt,
                 content=content,
                 visibility=visibility,
+                round_visibility=round_visibility,
                 reasoning=reasoning,
                 response=response,
             )
@@ -158,6 +163,7 @@ class History:
         heading: str,
         content: str,
         visibility: List[str],
+        round_visibility: List[str],
     ) -> None:
         """
         Add a narrator message to the game history.
@@ -178,6 +184,7 @@ class History:
             prompt="N/A",
             content=content,
             visibility=visibility,
+            round_visibility=round_visibility,
         )
 
     def render_for_player(self, player_id: str) -> str:

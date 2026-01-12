@@ -76,6 +76,7 @@ class Round:
             heading="Narrator",
             content=f"Welcome to round {self.context.round_index}!",
             visibility=all_player_ids,
+            round_visibility=all_player_ids,
         )
 
         for phase in self.phases:
@@ -87,6 +88,7 @@ class Round:
             heading="Narrator",
             content=f"Round {self.context.round_index} complete!",
             visibility=all_player_ids,
+            round_visibility=all_player_ids,
         )
 
         self.context.logger.info(f"Round {self.context.round_index} complete")

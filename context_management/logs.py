@@ -106,8 +106,9 @@ def parse_event(event: dict) -> tuple[str, str, str, str, str, list[str]]:
     reasoning = event.get("reasoning") or "Reasoning not found"
     content = event.get("content") or "Response content not found"
     visibility = event.get("visibility") or "Visibility not found"
+    round_visibility = event.get("round_visibility") or "Visibility not found"
 
-    return heading, role, prompt, reasoning, content, visibility
+    return heading, role, prompt, reasoning, content, visibility, round_visibility
 
 
 def render_terminal_event(
@@ -116,7 +117,7 @@ def render_terminal_event(
     """
     Render a single event for terminal output.
     """
-    _, role, prompt, reasoning, content, visibility = parse_event(event)
+    _, role, prompt, reasoning, content, visibility, round_visibility = parse_event(event)
 
     output = ""
 
@@ -130,7 +131,7 @@ def render_terminal_event(
         output += reasoning + "\n"
         output += "</reasoning>\n"
 
-    output += f"<response: role={role}, visibility={visibility}>\n"
+    output += f"<response: role={role}, visibility={visibility}>, round_visibility={round_visibility}>\n"
     output += content + "\n"
     output += "</response>\n"
 
@@ -167,7 +168,7 @@ def render_typst_event(
     """
     Render a single event as a Typst showybox.
     """
-    heading, role, prompt, reasoning, content, visibility = parse_event(event)
+    heading, role, prompt, reasoning, content, visibility, round_visibility = parse_event(event)
 
     if role == "narrator":
         frame = NARRATOR_FRAME
@@ -195,7 +196,7 @@ def render_typst_event(
         event_string += "\n"
 
     event_string += showybox(
-        heading + f" (visibility={','.join(visibility)})", content, frame=frame
+        heading + f" (visibility={','.join(visibility)}), (round_visibility={','.join(round_visibility)})", content, frame=frame
     )
 
     return event_string
