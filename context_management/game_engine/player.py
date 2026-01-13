@@ -59,6 +59,16 @@ class Player:
             messages=messages,
             **self.config.client_kwargs,
         )
+        # TODO: Measure number of tokens in and out to determine if we are compressing context
+        if hasattr(response, 'raw') and hasattr(response.raw, 'usage_metadata'):
+            usage_metadata = response.raw.usage_metadata
+            usage_in = getattr(usage_metadata, 'prompt_token_count', None)
+            usage_out = getattr(usage_metadata, 'candidates_token_count', None)
+            thoughts_tokens = getattr(usage_metadata, 'thoughts_token_count', None)
+            total_tokens = getattr(usage_metadata, 'total_token_count', None)
+           
+        print(f"[tokens] player={self.config.player_id} in={usage_in} out={usage_out} thoughts={thoughts_tokens} total={total_tokens}")
+
         return response
 
     def extract_vote(self, content: str, valid_player_ids: list[str]) -> Optional[str]:
